@@ -45,55 +45,66 @@ class PrintStack(Command):
 
 # Task manipulation
 
-class Create(Command):
+class DbCommand(Command):
+    def __init__(self, db):
+        super().__init__()
+        self.db = db
+
+class Create(DbCommand):
     def eval(self, namespace, stack):
-        desc = stack.pop()
-        raw_result = db.create_task(desc)
-        result = Task(raw_result)
+        summary = stack.pop()
+        tid = self.db.create_task(summary)
+        result = Task(tid, summary)
         stack.push(result)
 
-class Find(Command):
+class Find(DbCommand):
     def eval(self, namespace, stack):
         key = stack.pop()
-        result = db.find_task(key)
+        found = self.db.find_task(key)
+        result = Task(found['id'], found['summary']) if found else None
         stack.push(result)
 
-class SubtaskOf(Command):
+class SubtaskOf(DbCommand):
     def eval(self, namespace, stack):
         child = stack.pop()
         parent = stack.pop()
         assert isinstance(parent, Task)
         assert isinstance(child, Task)
-        result = db.create_rel(parent, child, 'SUBTASK')
+        result = self.db.create_rel(parent.id, child.id, 'SUBTASK')
         stack.push(result)
 
-class Follows(Command):
+class Follows(DbCommand):
     def eval(self, namespace, stack):
         second = stack.pop()
         first = stack.pop()
         assert isinstance(first, Task)
         assert isinstance(second, Task)
-        result = db.create_rel(first, second, 'FOLLOWS')
-        parent = db.find_rel(None, first.id, 'SUBTASK')
+        result = self.db.create_rel(first.id, second.id, 'FOLLOWS')
+        parent = self.db.find_rel(None, first.id, 'SUBTASK')
         if parent:
-            db.create_rel(parent, second, 'SUBTASK')
+            self.db.create_rel(parent.id, second.id, 'SUBTASK')
         stack.push(second)
 
-class Precedes(Command):
+class Precedes(DbCommand):
     def eval(self, namespace, stack):
         second = stack.pop()
         first = stack.pop()
         assert isinstance(first, Task)
         assert isinstance(second, Task)
-        result = db.create_rel(second.id, first.id, 'FOLLOWS')
-        parent = db.find_rel(None, first.id, 'SUBTASK')
+        result = self.db.create_rel(second.id, first.id, 'FOLLOWS')
+        parent = self.db.find_rel(None, first.id, 'SUBTASK')
         if parent:
-            db.create_rel(parent, second, 'SUBTASK')
+            self.db.create_rel(parent.db, second.db, 'SUBTASK')
         # FIXME
         # if first.is_next_action:
         #     second.set_next_action(True)
         #     first.set_next_action(False)
         stack.push(second)
+
+class Commit(DbCommand):
+    def eval(self, namespace, stack):
+        self.db.commit()
+
 
 # Process control
 

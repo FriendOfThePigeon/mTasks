@@ -1,7 +1,13 @@
 
 class Task:
-    def __init__(self, _id, desc):
+    def __init__(self, _id, summary):
         self.id = _id
-        self.desc = desc
+        self.summary = summary
+
+    def __str__(self):
+        return 'Task(%s, "%s")' % (self.id, self.summary)
+
+    def __repr__(self):
+        return 'Task(%s, "%s")' % (self.id, self.summary)
 
 

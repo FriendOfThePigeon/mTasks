@@ -5,13 +5,13 @@ import re
 
 import db
 from mtask_eval import mtask_eval
-from syntax import syntax
+from library import library
 
 
 def main():
     data_dir = 'data'
     db.initialize(data_dir)
-    mtask_eval(sys.argv[1:], syntax)
+    mtask_eval(sys.argv[1:], library)
     sys.exit(0)
     db.finalize()
 

@@ -5,4 +5,11 @@ class Rel:
         self.tid2 = tid2
         self.rtyp = rtyp
 
+    def __str__(self):
+        return 'Rel(%s, %s, %s)' % (self.tid1, self.tid2, self.rtyp)
+
+    def __repr__(self):
+        return 'Rel(%s, %s, %s)' % (self.tid1, self.tid2, self.rtyp)
+
+
 
