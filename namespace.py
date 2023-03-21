@@ -21,10 +21,13 @@ class Namespace:
             # raise KeyError('Not found: %s' % (key))
         return self._parent.get(key)
 
+    def get_local(self, key):
+        return self._dict.get(key)
+
     def set_local(self, key, value):
         self._dict[key] = value
 
-    def set(self, key, value):
+    def set_in_scope(self, key, value):
         for env in self.with_parents():
             last = env
             if env.has(key):

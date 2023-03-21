@@ -14,6 +14,9 @@ library = {
     ']': commands.Array(),
     'p': commands.PrintLast(),
     'f': commands.PrintStack(),
+    # Namespace manipulation
+    '<': commands.SetVar(),
+    '>': commands.GetVar(),
     # Task manipulation
     '+': commands.Create(tasks_db),
     '/': commands.Find(tasks_db),

@@ -1,7 +1,6 @@
-
+import sys
 import commands
-from task import Task
-from rel import Rel
+from entities import Task, Rel
 
 def gen_ints(start):
     i = start
@@ -18,25 +17,29 @@ class MockDb:
         self.rels_table = {}
         self.rel_ids = gen_ints(1)
 
+    def upsert_task(self, task):
+        if task.id is None:
+            task.id = next(self.task_ids)
+        self.tasks_table[task.id] = task.to_dict()
+        return task
+
     def create_task(self, summary):
-        _id = next(self.task_ids)
-        result = {
-                'id': _id,
-                'summary': summary
-                }
-        self.tasks_table[_id] = result
-        return _id
+        return self.upsert_task(Task.from_dict({'summary': summary}))
+
+    def upsert_rel(self, rel):
+        if rel.id is None:
+            rel.id = next(self.rel_ids)
+        self.rels_table[rel.id] = rel.to_dict()
+        return rel
 
     def create_rel(self, tid1, tid2, rtyp):
-        _id = next(self.rel_ids)
-        result = {
-                'id': _id,
-                'tid1': tid1,
-                'tid2': tid2,
-                'rtyp': rtyp
-                }
-        self.rels_table[_id] = result
-        return _id
+        return self.upsert_rel(Rel.from_dict({'tid1': tid1, 'tid2': tid2, 'rtyp': rtyp}))
+
+    def find_task(self, summary):
+        for each in self.tasks_table.values():
+            if each['summary'] == summary:
+                return each
+        return None
 
     def find_rel(self, tid1, tid2, rtyp):
         for each in self.rels_table.values():
@@ -59,6 +62,9 @@ def mock_library(mock_db):
         ']': commands.Array(),
         'p': commands.PrintLast(),
         'f': commands.PrintStack(),
+        # Namespace manipulation
+        '<': commands.SetVar(),
+        '>': commands.GetVar(),
         # Task manipulation
         '+': commands.Create(mock_db),
         '/': commands.Find(mock_db),

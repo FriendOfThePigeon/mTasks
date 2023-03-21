@@ -5,7 +5,8 @@ from namespace import Namespace
 
 def mtask_eval(words, library):
     stack = Stack()
-    namespace = Namespace(None, library)
+    library_ns = Namespace(None, library)
+    namespace = Namespace(library_ns, None)
     for w in words:
         a = namespace.get(w)
         if isinstance(a, Command):
